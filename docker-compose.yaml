@@ -2,6 +2,8 @@ version: "3.3"
 services:
   proxy:
     image: "traefik:latest"
+    container_name: traefik
+    restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
@@ -11,27 +13,19 @@ services:
       - ./certs:/certs
       - /var/run/docker.sock:/var/run/docker.sock:ro
     labels:
+      - "traefik.enable=true"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
-
       - "traefik.http.routers.proxy-insecure.entrypoints=web"
       - "traefik.http.routers.proxy-insecure.middlewares=redirect-to-https"
-
+      - "traefik.http.routers.proxy-insecure.rule=Host(`traefik.test`)"
       - "traefik.http.routers.proxy.entrypoints=web-secure"
       - "traefik.http.routers.proxy.service=api@internal"
       - "traefik.http.routers.proxy.tls=true"
       - "traefik.http.routers.proxy.middlewares=redirect-to-https"
+      - "traefik.http.routers.proxy.rule=Host(`traefik.test`)" 
     networks:
       - proxy
-  whoami:
-    image: containous/whoami:v1.3.0
-    networks:
-      - proxy
-    labels:
-      - "traefik.http.routers.whoami-insecure.entrypoints=web"
-      - "traefik.http.routers.whoami-insecure.middlewares=redirect-to-https"
 
-      - "traefik.http.routers.whoami.entrypoints=web-secure"
-      - "traefik.http.routers.whoami.tls=true"
 networks:
   proxy:
     external: true

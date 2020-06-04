@@ -5,7 +5,7 @@ If you are like me, you might have many different projects running at the same t
 Instead of accessing your application at `http://localhost:8005` you can now access it at `http://containerName.test` For example, if you had the following docker container running, your container would be available at [http://whoami.test](http://whoami.test)
 
 ``` shell
-docker run --rm -d --network=proxy --name=whoami containous/whoami:v1.3.0
+docker run --rm -d --network=proxy --name=whoami --label="traefik.enable=true" containous/whoami:v1.3.0
 ```
 
 ## System Requirements
@@ -15,9 +15,9 @@ This setup was built to support development on a Mac OS environment. You can lik
 - Homebrew
 
 ## Setup
-The following instructions will get you started with Traefik. All you need is this repository and the tool `dnsmasq` which will point the `.test` domain to localhost.
+The following instructions will get you started with Traefik with .test domain, but you can you any other domain zone. All you need is this repository and the tool `dnsmasq` which will point the `.test` domain to localhost.
 
-To start, clone this repository. I cloned it into `$HOME/.config/traefik`
+To start, clone this repository.
 
 Create a proxy docker network
 ``` shell
@@ -48,7 +48,7 @@ sudo brew services stop dnsmasq && sudo brew services start dnsmasq
 
 Generate certificates for .test domain
 ``` shell
-(cd certs && bash generate-test-cert.bash)
+(cd certs && bash generate-cert.bash test)
 ```
 
 Run traefik as a container on the proxy network
@@ -56,11 +56,11 @@ Run traefik as a container on the proxy network
 docker-compose up -d
 ```
 
-If your setup worked, you should be able to go to [http://traefik.proxy.test](http://traefik.proxy.test) (assuming you cloned this into a directory called traefik) and you will see the Traefik dashboard, which details all of the exposed services.
+If your setup worked, you should be able to go to [http://traefik.test](http://traefik.test) and you will see the Traefik dashboard, which details all of the exposed services.
 
 All docker containers that exist within the `proxy` network are proxied by traefik.
 
-Docker-compose containers are hosted at `http://(projectName).(serviceName).test` and regular docker containers will be hosted at `http://(containerName).test`
+Docker-compose containers which have not custom host name are hosted at `http://(projectName).(serviceName).test` and regular docker containers will be hosted at `http://(containerName).test`
 
 To add a container to the proxy network in a docker-compose file, you can add the following to your compose file:
 ``` yaml
@@ -82,6 +82,8 @@ version: "3.3"
 services:
   serviceName:
     labels:
+      # Enable traefik for container, because traefik setup with option exposedByDefault=false
+      - "traefik.enable=true"
       # Enables redirect to https, replace `containerName`
       - "traefik.http.routers.containerName-insecure.entrypoints=web"
       - "traefik.http.routers.containerName-insecure.middlewares=redirect-to-https"

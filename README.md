@@ -15,7 +15,7 @@ This setup was built to support development on a Mac OS environment. You can lik
 - Homebrew
 
 ## Setup
-The following instructions will get you started with Traefik with .test domain, but you can you any other domain zone. All you need is this repository and the tool `dnsmasq` which will point the `.test` domain to localhost.
+The following instructions will get you started with Traefik with `.test` domain, but you can you any other domain zone. All you need is this repository and the tool `dnsmasq` which will point the `.test` domain to localhost.
 
 To start, clone this repository.
 
